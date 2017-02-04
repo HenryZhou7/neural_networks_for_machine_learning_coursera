@@ -2,5 +2,39 @@ function ret = cd1(rbm_w, visible_data)
 % <rbm_w> is a matrix of size <number of hidden units> by <number of visible units>
 % <visible_data> is a (possibly but not necessarily binary) matrix of size <number of visible units> by <number of data cases>
 % The returned value is the gradient approximation produced by CD-1. It's of the same shape as <rbm_w>.
-    error('not yet implemented');
+    %{
+    visible_data = sample_bernoulli(visible_data);
+    hidden_probs = visible_state_to_hidden_probabilities(rbm_w, visible_data);
+    hidden_states = sample_bernoulli(hidden_probs);
+    
+    initial = configuration_goodness_gradient(visible_data, hidden_states);
+    
+    visible_probs = hidden_state_to_visible_probabilities(rbm_w, hidden_states);
+    visible_states = sample_bernoulli(visible_probs);
+    hidden_probs = visible_state_to_hidden_probabilities(rbm_w, visible_states);
+    hidden_states = sample_bernoulli(hidden_probs);
+    
+    reconstruction = configuration_goodness_gradient(visible_states, hidden_states);
+    %}
+    
+    visible_data = sample_bernoulli(visible_data);
+
+    hidden_probabilities = visible_state_to_hidden_probabilities(rbm_w, visible_data);
+
+    hidden_sample = sample_bernoulli(hidden_probabilities);
+
+    data_goodness = configuration_goodness_gradient(visible_data, hidden_sample);
+
+    visible_probabilities = hidden_state_to_visible_probabilities(rbm_w, hidden_sample);
+
+    visible_sample = sample_bernoulli(visible_probabilities);
+
+    hidden_probabilities = visible_state_to_hidden_probabilities(rbm_w, visible_sample);
+  
+    reconstruction_goodness = configuration_goodness_gradient(visible_sample, hidden_probabilities);
+
+    ret = data_goodness .- reconstruction_goodness;
+
+    %ret = initial - reconstruction;
+    
 end
